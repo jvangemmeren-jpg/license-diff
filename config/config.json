@@ -2,12 +2,12 @@
   "workingDirectory": "./work",
   "applications": [
     {
-      "name": "DemoAppNuget",
-      "gitUrl": "https://github.com/dein-user/DemoAppNuget.git",
-      "fromCommit": "1111111111111111111111111111111111111111",
-      "toCommit":   "2222222222222222222222222222222222222222",
+      "name": "NugetProjekt",
+      "gitUrl": "https://github.com/jvangemmeren-jpg/license-diff.git",
+      "fromCommit": "1fb5abe5be049fb36596d5e5eaeddd4371861b31",
+      "toCommit":   "da95fa0be21baa0a354b0bd9943f1fab72fe20e0",
       "csprojPaths": [
-        "src/DemoNugetProject/DemoNugetProject.csproj"
+        "src/NugetDemo/.sln/src/NugetProjekt/NugetProjekt.csproj"
       ],
       "npmProjectDirs": [],
       "excludes": {
@@ -19,15 +19,15 @@
       }
     },
     {
-      "name": "DemoAppNpmNuget",
-      "gitUrl": "https://github.com/dein-user/DemoAppNpmNuget.git",
-      "fromCommit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "toCommit":   "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "name": "NpmProjekt",
+      "gitUrl": "https://github.com/jvangemmeren-jpg/license-diff.git",
+      "fromCommit": "1fb5abe5be049fb36596d5e5eaeddd4371861b31",
+      "toCommit":   "da95fa0be21baa0a354b0bd9943f1fab72fe20e0",
       "csprojPaths": [
-        "src/BackendProject/BackendProject.csproj"
+        "src/NpmDemo/.sln/src/NpmProjekt/NpmProjekt.csproj"
       ],
       "npmProjectDirs": [
-        "src/FrontendProject"
+        "src/NpmDemo/.sln/src/NpmProjektFrontend"
       ],
       "excludes": {
         "nuget": [],
