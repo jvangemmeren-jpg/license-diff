@@ -1,0 +1,5 @@
+C:\Users\jvang\source\repos\license_diff\LicenseDiffTool\LicenseDiffTool\obj\Debug\net6.0\LicenseDiffTool.csproj.AssemblyReference.cache
+C:\Users\jvang\source\repos\license_diff\LicenseDiffTool\LicenseDiffTool\obj\Debug\net6.0\LicenseDiffTool.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\jvang\source\repos\license_diff\LicenseDiffTool\LicenseDiffTool\obj\Debug\net6.0\LicenseDiffTool.AssemblyInfoInputs.cache
+C:\Users\jvang\source\repos\license_diff\LicenseDiffTool\LicenseDiffTool\obj\Debug\net6.0\LicenseDiffTool.AssemblyInfo.cs
+C:\Users\jvang\source\repos\license_diff\LicenseDiffTool\LicenseDiffTool\obj\Debug\net6.0\LicenseDiffTool.csproj.CoreCompileInputs.cache

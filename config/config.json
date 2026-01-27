@@ -1,0 +1,40 @@
+{
+  "workingDirectory": "./work",
+  "applications": [
+    {
+      "name": "DemoAppNuget",
+      "gitUrl": "https://github.com/dein-user/DemoAppNuget.git",
+      "fromCommit": "1111111111111111111111111111111111111111",
+      "toCommit":   "2222222222222222222222222222222222222222",
+      "csprojPaths": [
+        "src/DemoNugetProject/DemoNugetProject.csproj"
+      ],
+      "npmProjectDirs": [],
+      "excludes": {
+        "nuget": [
+          "Microsoft.*",
+          "System.*"
+        ],
+        "npm": []
+      }
+    },
+    {
+      "name": "DemoAppNpmNuget",
+      "gitUrl": "https://github.com/dein-user/DemoAppNpmNuget.git",
+      "fromCommit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "toCommit":   "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "csprojPaths": [
+        "src/BackendProject/BackendProject.csproj"
+      ],
+      "npmProjectDirs": [
+        "src/FrontendProject"
+      ],
+      "excludes": {
+        "nuget": [],
+        "npm": [
+          "@types/*"
+        ]
+      }
+    }
+  ]
+}
