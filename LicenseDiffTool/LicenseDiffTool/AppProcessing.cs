@@ -14,15 +14,15 @@ namespace LicenseDiffTool.AppProcessing
         public string GitUrl { get; set; }
         public string FromCommit { get; set; }
         public string ToCommit { get; set; }
-        public ExcludeConfig Excludes { get; set; } = new();
-        public List<string> CsprojPaths { get; set; } = new();
-        public List<string> NpmProjectDirs { get; set; } = new();
+        public ExcludeConfig Excludes { get; set; } = new ExcludeConfig();
+        public List<string> CsprojPaths { get; set; } = new List<string>();
+        public List<string> NpmProjectDirs { get; set; } = new List<string>();
     }
 
     public class ExcludeConfig
     {
-        public List<string> Nuget { get; set; } = new();
-        public List<string> Npm { get; set; } = new();
+        public List<string> Nuget { get; set; } = new List<string>();
+        public List<string> Npm { get; set; } = new List<string>();
     }
 
     public class DependencyInfo
@@ -64,15 +64,17 @@ namespace LicenseDiffTool.AppProcessing
 
             CloneOrOpen(app.GitUrl, repoDir);
 
+            // fromCommit
             Checkout(repoDir, app.FromCommit);
             var fromDeps = AnalyzeAllDependencies(repoDir, app);
             ApplyExcludes(fromDeps, app.Excludes);
-            // später: LicenseResolver.Resolve(fromDeps)
+            ResolveLicenses(fromDeps, repoDir);
 
+            // toCommit
             Checkout(repoDir, app.ToCommit);
             var toDeps = AnalyzeAllDependencies(repoDir, app);
             ApplyExcludes(toDeps, app.Excludes);
-            // später: LicenseResolver.Resolve(toDeps)
+            ResolveLicenses(toDeps, repoDir);
 
             var diff = CalculateDiff(fromDeps, toDeps);
 
@@ -96,13 +98,17 @@ namespace LicenseDiffTool.AppProcessing
 
         private void Checkout(string repoDir, string commitHash)
         {
-            using var repo = new Repository(repoDir);
-            var commit = repo.Lookup<Commit>(commitHash)
-                         ?? throw new InvalidOperationException($"Commit {commitHash} not found in {repoDir}");
-            Commands.Checkout(repo, commit, new CheckoutOptions
+            using (var repo = new Repository(repoDir))
             {
-                CheckoutModifiers = CheckoutModifiers.Force
-            });
+                var commit = repo.Lookup<Commit>(commitHash);
+                if (commit == null)
+                    throw new InvalidOperationException("Commit " + commitHash + " not found in " + repoDir);
+
+                Commands.Checkout(repo, commit, new CheckoutOptions
+                {
+                    CheckoutModifiers = CheckoutModifiers.Force
+                });
+            }
         }
 
         private List<DependencyInfo> AnalyzeAllDependencies(string repoDir, AppConfig app)
@@ -112,14 +118,18 @@ namespace LicenseDiffTool.AppProcessing
             foreach (var relativeCsproj in app.CsprojPaths)
             {
                 var csprojPath = Path.Combine(repoDir, relativeCsproj);
-                if (!File.Exists(csprojPath)) continue;
+                if (!File.Exists(csprojPath))
+                    continue;
+
                 result.AddRange(AnalyzeNuGet(csprojPath));
             }
 
             foreach (var relativeDir in app.NpmProjectDirs)
             {
                 var npmDir = Path.Combine(repoDir, relativeDir);
-                if (!Directory.Exists(npmDir)) continue;
+                if (!Directory.Exists(npmDir))
+                    continue;
+
                 result.AddRange(AnalyzeNpm(npmDir));
             }
 
@@ -133,34 +143,44 @@ namespace LicenseDiffTool.AppProcessing
             var psi = new ProcessStartInfo
             {
                 FileName = "dotnet",
-                Arguments = $"list \"{csprojPath}\" package --include-transitive --format json",
+                Arguments = "list \"" + csprojPath + "\" package --include-transitive --format json",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
 
-            using var process = Process.Start(psi);
-            if (process == null) return deps;
-
-            var output = process.StandardOutput.ReadToEnd();
-            var error = process.StandardError.ReadToEnd();
-            process.WaitForExit();
-
-            if (process.ExitCode != 0)
-                throw new InvalidOperationException($"dotnet list package failed for {csprojPath}: {error}");
-
-            using var doc = JsonDocument.Parse(output);
-            var root = doc.RootElement;
-            if (!root.TryGetProperty("projects", out var projects)) return deps;
-
-            foreach (var project in projects.EnumerateArray())
+            using (var process = Process.Start(psi))
             {
-                if (!project.TryGetProperty("frameworks", out var frameworks)) continue;
-                foreach (var fw in frameworks.EnumerateArray())
+                if (process == null)
+                    return deps;
+
+                var output = process.StandardOutput.ReadToEnd();
+                var error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+
+                if (process.ExitCode != 0)
+                    throw new InvalidOperationException("dotnet list package failed for " + csprojPath + ": " + error);
+
+                using (var doc = JsonDocument.Parse(output))
                 {
-                    AddNuGetPackagesFromArray(fw, "topLevelPackages", deps);
-                    AddNuGetPackagesFromArray(fw, "transitivePackages", deps);
+                    var root = doc.RootElement;
+                    JsonElement projects;
+                    if (!root.TryGetProperty("projects", out projects))
+                        return deps;
+
+                    foreach (var project in projects.EnumerateArray())
+                    {
+                        JsonElement frameworks;
+                        if (!project.TryGetProperty("frameworks", out frameworks))
+                            continue;
+
+                        foreach (var fw in frameworks.EnumerateArray())
+                        {
+                            AddNuGetPackagesFromArray(fw, "topLevelPackages", deps);
+                            AddNuGetPackagesFromArray(fw, "transitivePackages", deps);
+                        }
+                    }
                 }
             }
 
@@ -169,13 +189,25 @@ namespace LicenseDiffTool.AppProcessing
 
         private void AddNuGetPackagesFromArray(JsonElement fw, string propertyName, List<DependencyInfo> deps)
         {
-            if (!fw.TryGetProperty(propertyName, out var pkgs)) return;
+            JsonElement pkgs;
+            if (!fw.TryGetProperty(propertyName, out pkgs))
+                return;
 
             foreach (var pkg in pkgs.EnumerateArray())
             {
                 var name = pkg.GetProperty("id").GetString();
-                var version = pkg.GetProperty("requestedVersion").GetString()
-                              ?? pkg.GetProperty("resolvedVersion").GetString();
+                string version = null;
+
+                JsonElement requested;
+                if (pkg.TryGetProperty("requestedVersion", out requested))
+                    version = requested.GetString();
+
+                if (version == null)
+                {
+                    JsonElement resolved;
+                    if (pkg.TryGetProperty("resolvedVersion", out resolved))
+                        version = resolved.GetString();
+                }
 
                 if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(version))
                     continue;
@@ -204,25 +236,31 @@ namespace LicenseDiffTool.AppProcessing
                 CreateNoWindow = true
             };
 
-            using var process = Process.Start(psi);
-            if (process == null) return deps;
+            using (var process = Process.Start(psi))
+            {
+                if (process == null)
+                    return deps;
 
-            var output = process.StandardOutput.ReadToEnd();
-            var error = process.StandardError.ReadToEnd();
-            process.WaitForExit();
+                var output = process.StandardOutput.ReadToEnd();
+                var error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
 
-            if (string.IsNullOrWhiteSpace(output))
-                throw new InvalidOperationException($"npm ls failed in {workingDir}: {error}");
+                if (string.IsNullOrWhiteSpace(output))
+                    throw new InvalidOperationException("npm ls failed in " + workingDir + ": " + error);
 
-            using var doc = JsonDocument.Parse(output);
-            ParseNpmDependencies(doc.RootElement, deps);
+                using (var doc = JsonDocument.Parse(output))
+                {
+                    ParseNpmDependencies(doc.RootElement, deps);
+                }
+            }
 
             return deps;
         }
 
         private void ParseNpmDependencies(JsonElement element, List<DependencyInfo> deps)
         {
-            if (!element.TryGetProperty("dependencies", out var dependencies))
+            JsonElement dependencies;
+            if (!element.TryGetProperty("dependencies", out dependencies))
                 return;
 
             foreach (var dep in dependencies.EnumerateObject())
@@ -230,11 +268,13 @@ namespace LicenseDiffTool.AppProcessing
                 var name = dep.Name;
                 var value = dep.Value;
 
-                if (!value.TryGetProperty("version", out var versionProp))
+                JsonElement versionProp;
+                if (!value.TryGetProperty("version", out versionProp))
                     continue;
 
                 var version = versionProp.GetString();
-                if (string.IsNullOrEmpty(version)) continue;
+                if (string.IsNullOrEmpty(version))
+                    continue;
 
                 deps.Add(new DependencyInfo
                 {
@@ -243,6 +283,7 @@ namespace LicenseDiffTool.AppProcessing
                     PackageManager = "npm"
                 });
 
+                // rekursiv für transitive Dependencies
                 ParseNpmDependencies(value, deps);
             }
         }
@@ -263,11 +304,12 @@ namespace LicenseDiffTool.AppProcessing
         {
             foreach (var pattern in patterns)
             {
-                if (string.IsNullOrWhiteSpace(pattern)) continue;
+                if (string.IsNullOrWhiteSpace(pattern))
+                    continue;
 
                 if (pattern.EndsWith("*", StringComparison.Ordinal))
                 {
-                    var prefix = pattern[..^1];
+                    var prefix = pattern.Substring(0, pattern.Length - 1);
                     if (name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
                         return true;
                 }
@@ -280,20 +322,19 @@ namespace LicenseDiffTool.AppProcessing
             return false;
         }
 
-        private List<DiffEntry> CalculateDiff(
-            List<DependencyInfo> from,
-            List<DependencyInfo> to)
+        private List<DiffEntry> CalculateDiff(List<DependencyInfo> from, List<DependencyInfo> to)
         {
             var result = new List<DiffEntry>();
 
             var fromMap = from
-                .GroupBy(d => (d.PackageManager, d.Name))
+                .GroupBy(d => d.PackageManager + "|" + d.Name)
                 .ToDictionary(g => g.Key, g => g.First());
 
             var toMap = to
-                .GroupBy(d => (d.PackageManager, d.Name))
+                .GroupBy(d => d.PackageManager + "|" + d.Name)
                 .ToDictionary(g => g.Key, g => g.First());
 
+            // ADDED
             foreach (var kvp in toMap)
             {
                 if (!fromMap.ContainsKey(kvp.Key))
@@ -307,6 +348,7 @@ namespace LicenseDiffTool.AppProcessing
                 }
             }
 
+            // REMOVED
             foreach (var kvp in fromMap)
             {
                 if (!toMap.ContainsKey(kvp.Key))
@@ -320,9 +362,11 @@ namespace LicenseDiffTool.AppProcessing
                 }
             }
 
+            // LICENSE_CHANGED
             foreach (var kvp in fromMap)
             {
-                if (!toMap.TryGetValue(kvp.Key, out var toDep))
+                DependencyInfo toDep;
+                if (!toMap.TryGetValue(kvp.Key, out toDep))
                     continue;
 
                 var fromDep = kvp.Value;
@@ -339,6 +383,156 @@ namespace LicenseDiffTool.AppProcessing
 
             return result;
         }
+
+        // ---------- Lizenzauflösung ----------
+
+        private void ResolveLicenses(List<DependencyInfo> deps, string repoDir)
+        {
+            foreach (var dep in deps)
+            {
+                if (dep.PackageManager == "nuget")
+                    ResolveNuGetLicense(dep);
+                else if (dep.PackageManager == "npm")
+                    ResolveNpmLicense(dep, repoDir);
+            }
+        }
+
+        private void ResolveNuGetLicense(DependencyInfo dep)
+        {
+            try
+            {
+                var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                var packageDir = Path.Combine(userProfile, ".nuget", "packages",
+                    dep.Name.ToLowerInvariant(), dep.Version);
+
+                if (!Directory.Exists(packageDir))
+                {
+                    dep.License = "UNKNOWN";
+                    dep.LicenseUrl = "https://www.nuget.org/packages/" + dep.Name + "/" + dep.Version;
+                    return;
+                }
+
+                var nuspecPath = Directory.GetFiles(packageDir, "*.nuspec").FirstOrDefault();
+                if (nuspecPath == null)
+                {
+                    dep.License = "UNKNOWN";
+                    dep.LicenseUrl = "https://www.nuget.org/packages/" + dep.Name + "/" + dep.Version;
+                    return;
+                }
+
+                var xml = File.ReadAllText(nuspecPath);
+
+                // license type="expression"
+                var licenseTag = "<license type=\"expression\">";
+                var idx = xml.IndexOf(licenseTag, StringComparison.OrdinalIgnoreCase);
+                if (idx >= 0)
+                {
+                    var start = idx + licenseTag.Length;
+                    var end = xml.IndexOf("</license>", start, StringComparison.OrdinalIgnoreCase);
+                    if (end > start)
+                    {
+                        dep.License = xml.Substring(start, end - start).Trim();
+                        return;
+                    }
+                }
+
+                // legacy licenseUrl
+                var urlTag = "<licenseUrl>";
+                idx = xml.IndexOf(urlTag, StringComparison.OrdinalIgnoreCase);
+                if (idx >= 0)
+                {
+                    var start = idx + urlTag.Length;
+                    var end = xml.IndexOf("</licenseUrl>", start, StringComparison.OrdinalIgnoreCase);
+                    if (end > start)
+                    {
+                        dep.LicenseUrl = xml.Substring(start, end - start).Trim();
+                        dep.License = "UNKNOWN";
+                        return;
+                    }
+                }
+
+                dep.License = "UNKNOWN";
+            }
+            catch
+            {
+                dep.License = "UNKNOWN";
+            }
+        }
+
+        private void ResolveNpmLicense(DependencyInfo dep, string repoDir)
+        {
+            try
+            {
+                var packageJsonPath = Path.Combine(repoDir, "node_modules", dep.Name, "package.json");
+                if (!File.Exists(packageJsonPath))
+                {
+                    dep.License = "UNKNOWN";
+                    dep.LicenseUrl = "https://www.npmjs.com/package/" + dep.Name;
+                    return;
+                }
+
+                var json = File.ReadAllText(packageJsonPath);
+                using (var doc = JsonDocument.Parse(json))
+                {
+                    var root = doc.RootElement;
+
+                    JsonElement licenseProp;
+                    if (root.TryGetProperty("license", out licenseProp))
+                    {
+                        dep.License = licenseProp.GetString() ?? "UNKNOWN";
+                    }
+                    else
+                    {
+                        JsonElement licensesProp;
+                        if (root.TryGetProperty("licenses", out licensesProp) &&
+                            licensesProp.ValueKind == JsonValueKind.Array)
+                        {
+                            var list = new List<string>();
+                            foreach (var lic in licensesProp.EnumerateArray())
+                            {
+                                JsonElement typeProp;
+                                if (lic.TryGetProperty("type", out typeProp))
+                                {
+                                    var type = typeProp.GetString();
+                                    if (!string.IsNullOrEmpty(type))
+                                        list.Add(type);
+                                }
+                            }
+                            dep.License = list.Count > 0 ? string.Join(" OR ", list) : "UNKNOWN";
+                        }
+                    }
+
+                    if (string.IsNullOrEmpty(dep.License) || dep.License == "UNKNOWN")
+                    {
+                        JsonElement homepageProp;
+                        if (root.TryGetProperty("homepage", out homepageProp))
+                        {
+                            dep.LicenseUrl = homepageProp.GetString();
+                        }
+                        else
+                        {
+                            JsonElement repoProp;
+                            if (root.TryGetProperty("repository", out repoProp))
+                            {
+                                if (repoProp.ValueKind == JsonValueKind.String)
+                                {
+                                    dep.LicenseUrl = repoProp.GetString();
+                                }
+                                else
+                                {
+                                    JsonElement urlProp;
+                                    if (repoProp.TryGetProperty("url", out urlProp))
+                                        dep.LicenseUrl = urlProp.GetString();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                dep.License = "UNKNOWN";
+            }
+        }
     }
 }
-

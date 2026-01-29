@@ -32,7 +32,6 @@ namespace LicenseDiffTool.Cli
             var configOption = new Option<string>("--config")
             {
                 Description = "Pfad zur Konfigurationsdatei (JSON).",
-                // DefaultValueFactory ist das übliche Muster in 2.x.[web:3]
                 DefaultValueFactory = _ => "./config/config.json"
             };
             configOption.Aliases.Add("-c");
@@ -64,10 +63,8 @@ namespace LicenseDiffTool.Cli
                 verboseOption
             };
 
-            // Fallback auf SetAction + Parse(args).InvokeAsync(), falls SetHandler in 2.0.2 nicht existiert.[web:18][web:22]
             rootCommand.SetAction(parseResult =>
             {
-                // Werte aus ParseResult holen.
                 var configPath = parseResult.GetValue(configOption);
                 var outDir = parseResult.GetValue(outOption);
                 var appFilter = parseResult.GetValue(appOption);
@@ -81,13 +78,10 @@ namespace LicenseDiffTool.Cli
                     Verbose = verbose
                 };
 
-                // Da SetAction eine sync Signatur erwartet, aber RunAsync async ist,
-                // benutzen wir GetAwaiter().GetResult() und geben den Exitcode zurück.
                 var exitCode = RunAsync(options).GetAwaiter().GetResult();
                 return exitCode;
             });
 
-            // In 2.x ist das Muster: Parse(args).InvokeAsync() oder Invoke().[web:22]
             var parseResult = rootCommand.Parse(args);
             return await parseResult.InvokeAsync();
         }
@@ -143,7 +137,6 @@ namespace LicenseDiffTool.Cli
                     catch (Exception ex)
                     {
                         Console.Error.WriteLine($"[ERROR] App '{app.Name}' fehlgeschlagen: {ex.Message}");
-                        // Fehler einer App blockieren andere nicht
                     }
                 }
 
@@ -190,8 +183,6 @@ namespace LicenseDiffTool.Cli
             var basePath = Path.GetDirectoryName(fullPath);
             var fileName = Path.GetFileName(fullPath);
 
-            // SetBasePath + AddJsonFile sind Extension-Methoden, die über
-            // Microsoft.Extensions.Configuration.Json / FileExtensions kommen.[web:19][web:26]
             var builder = new ConfigurationBuilder();
 
             if (!string.IsNullOrEmpty(basePath))
@@ -204,7 +195,6 @@ namespace LicenseDiffTool.Cli
             var configRoot = builder.Build();
 
             var toolConfig = new ToolConfig();
-            // Bind kommt aus Microsoft.Extensions.Configuration.Binder.[web:20][web:24]
             configRoot.Bind(toolConfig);
 
             ValidateConfig(toolConfig);
