@@ -11,12 +11,12 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("LicenseDiffTool")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("NugetDemo")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6e04a938df4d24265d7f184aa7ac884628a6c173")]
-[assembly: System.Reflection.AssemblyProductAttribute("LicenseDiffTool")]
-[assembly: System.Reflection.AssemblyTitleAttribute("LicenseDiffTool")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bacc3f603f7026cdd13f4fb2b1e74cc1b3c00e80")]
+[assembly: System.Reflection.AssemblyProductAttribute("NugetDemo")]
+[assembly: System.Reflection.AssemblyTitleAttribute("NugetDemo")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 
 // Von der MSBuild WriteCodeFragment-Klasse generiert.
