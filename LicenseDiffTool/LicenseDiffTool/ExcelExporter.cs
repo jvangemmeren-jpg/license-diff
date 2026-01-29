@@ -137,7 +137,7 @@ namespace LicenseDiffTool.Reporting
                 allDeps.AddRange(result.ToDependencies);
             }
 
-            // Konsolidieren nach (PackageManager, Name, License) → höchste Version
+            // Konsolidieren nach (PackageManager, Name, License) => höchste Version
             var consolidated = allDeps
                 .GroupBy(d => new { d.PackageManager, d.Name, d.License })
                 .Select(g => new
