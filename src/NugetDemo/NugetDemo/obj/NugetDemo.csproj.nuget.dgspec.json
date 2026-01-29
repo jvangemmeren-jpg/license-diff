@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NugetDemo\\NugetDemo\\NugetDemo\\NugetDemo.csproj": {}
+    "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NugetDemo\\NugetDemo\\NugetDemo.csproj": {}
   },
   "projects": {
-    "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NugetDemo\\NugetDemo\\NugetDemo\\NugetDemo.csproj": {
+    "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NugetDemo\\NugetDemo\\NugetDemo.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NugetDemo\\NugetDemo\\NugetDemo\\NugetDemo.csproj",
+        "projectUniqueName": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NugetDemo\\NugetDemo\\NugetDemo.csproj",
         "projectName": "NugetDemo",
-        "projectPath": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NugetDemo\\NugetDemo\\NugetDemo\\NugetDemo.csproj",
+        "projectPath": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NugetDemo\\NugetDemo\\NugetDemo.csproj",
         "packagesPath": "C:\\Users\\jvang\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NugetDemo\\NugetDemo\\NugetDemo\\obj\\",
+        "outputPath": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NugetDemo\\NugetDemo\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -50,6 +50,12 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
+          "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.4, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",

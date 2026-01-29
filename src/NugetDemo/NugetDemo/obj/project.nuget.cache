@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "P0FqypgAsEo=",
+  "dgSpecHash": "3ErYeQYcHtI=",
   "success": true,
-  "projectFilePath": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NugetDemo\\NugetDemo\\NugetDemo\\NugetDemo.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NugetDemo\\NugetDemo\\NugetDemo.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\jvang\\.nuget\\packages\\newtonsoft.json\\13.0.4\\newtonsoft.json.13.0.4.nupkg.sha512"
+  ],
   "logs": []
 }

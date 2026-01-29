@@ -63,3 +63,4 @@ C:\Users\jvang\source\repos\license_diff\LicenseDiffTool\LicenseDiffTool\obj\Deb
 C:\Users\jvang\source\repos\license_diff\LicenseDiffTool\LicenseDiffTool\obj\Debug\net8.0\LicenseDiffTool.pdb
 C:\Users\jvang\source\repos\license_diff\LicenseDiffTool\LicenseDiffTool\obj\Debug\net8.0\LicenseDiffTool.genruntimeconfig.cache
 C:\Users\jvang\source\repos\license_diff\LicenseDiffTool\LicenseDiffTool\obj\Debug\net8.0\ref\LicenseDiffTool.dll
+C:\Users\jvang\source\repos\license_diff\LicenseDiffTool\LicenseDiffTool\obj\Debug\net8.0\LicenseDiffTool.sourcelink.json

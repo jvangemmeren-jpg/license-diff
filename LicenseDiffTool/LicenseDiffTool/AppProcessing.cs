@@ -119,8 +119,12 @@ namespace LicenseDiffTool.AppProcessing
             {
                 var csprojPath = Path.Combine(repoDir, relativeCsproj);
                 if (!File.Exists(csprojPath))
+                {
+                    Console.WriteLine("[DEBUG] csproj nicht gefunden: " + csprojPath);
                     continue;
+                }
 
+                Console.WriteLine("[DEBUG] Analysiere NuGet für: " + csprojPath);
                 result.AddRange(AnalyzeNuGet(csprojPath));
             }
 
@@ -128,13 +132,24 @@ namespace LicenseDiffTool.AppProcessing
             {
                 var npmDir = Path.Combine(repoDir, relativeDir);
                 if (!Directory.Exists(npmDir))
+                {
+                    Console.WriteLine("[DEBUG] npm-Verzeichnis nicht gefunden: " + npmDir);
                     continue;
+                }
 
+                Console.WriteLine("[DEBUG] Analysiere npm für: " + npmDir);
                 result.AddRange(AnalyzeNpm(npmDir));
+            }
+
+            Console.WriteLine("[DEBUG] Gefundene Dependencies: " + result.Count);
+            foreach (var d in result)
+            {
+                Console.WriteLine("  - " + d.PackageManager + " " + d.Name + " " + d.Version);
             }
 
             return result;
         }
+
 
         private IEnumerable<DependencyInfo> AnalyzeNuGet(string csprojPath)
         {

@@ -27,7 +27,7 @@
         "src/NpmDemo/NpmDemo/NpmDemo.csproj"
       ],
       "npmProjectDirs": [
-        ""
+        "src/NpmDemo/NpmDemo"
       ],
       "excludes": {
         "nuget": [],
