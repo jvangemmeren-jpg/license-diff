@@ -56,11 +56,11 @@ namespace LicenseDiffTool.Reporting
             FormatHeaderRow(ws.Row(1));
 
             var fromMap = appResult.FromDependencies
-                .GroupBy(d => d.PackageManager + "|" + d.Name)
-                .ToDictionary(g => g.Key, g => g.First());
+    .GroupBy(d => d.PackageManager + "|" + d.Name + "|" + (d.License ?? ""))
+    .ToDictionary(g => g.Key, g => g.First());
 
             var toMap = appResult.ToDependencies
-                .GroupBy(d => d.PackageManager + "|" + d.Name)
+                .GroupBy(d => d.PackageManager + "|" + d.Name + "|" + (d.License ?? ""))
                 .ToDictionary(g => g.Key, g => g.First());
 
             var allKeys = new HashSet<string>(fromMap.Keys);
@@ -190,7 +190,7 @@ namespace LicenseDiffTool.Reporting
             // Lookup für LicenseUrl aus ToDependencies
             var urlLookup = appResults
                 .SelectMany(r => r.ToDependencies)
-                .GroupBy(d => d.PackageManager + "|" + d.Name + "|" + d.License)
+                .GroupBy(d => d.PackageManager + "|" + d.Name + "|" + (d.License ?? ""))
                 .ToDictionary(
                     g => g.Key,
                     g => g.FirstOrDefault(dep => !string.IsNullOrEmpty(dep.LicenseUrl)) != null
@@ -198,21 +198,20 @@ namespace LicenseDiffTool.Reporting
                         : null
                 );
 
-            // Gruppieren nach (PackageManager, Name) – pro Paket über alle Apps
+            // Gruppieren nach (PackageManager, Name, License) – getrennte Zeilen für gleiche Namen mit verschiedenen Lizenzen
             var consolidated = allSummaries
-                .GroupBy(s => new { s.PackageManager, s.Name })
+                .GroupBy(s => new { s.PackageManager, s.Name, License = s.ToLicense })
                 .Select(g =>
                 {
                     var anyWithTo = g.FirstOrDefault(s => !string.IsNullOrEmpty(s.ToVersion)) ?? g.First();
 
-                    var toLicense = anyWithTo.ToLicense;
+                    var toLicense = anyWithTo.ToLicense ?? "";
                     var licenseKey = anyWithTo.PackageManager + "|" + anyWithTo.Name + "|" + toLicense;
 
                     return new
                     {
                         anyWithTo.PackageManager,
                         anyWithTo.Name,
-                        // From/To aus Sicht eines beliebigen Repos (repräsentativ)
                         FromVersion = anyWithTo.FromVersion,
                         ToVersion = anyWithTo.ToVersion,
                         FromLicense = anyWithTo.FromLicense,
@@ -229,6 +228,7 @@ namespace LicenseDiffTool.Reporting
                 })
                 .OrderBy(x => x.PackageManager)
                 .ThenBy(x => x.Name)
+                .ThenBy(x => x.License)
                 .ToList();
 
             int rowNum = 2;
@@ -253,8 +253,6 @@ namespace LicenseDiffTool.Reporting
 
             ws.Columns().AdjustToContents();
         }
-
-
 
         private void CreateAggregatedDiffSheet(XLWorkbook workbook, List<AppResult> appResults)
         {

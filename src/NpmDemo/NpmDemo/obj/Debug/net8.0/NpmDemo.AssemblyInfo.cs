@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NpmDemo")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d3e73390c834ff070dfa32f6b8a7ba3dd32ef12a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6166decd5e9c8c6c5f3b39922fbc39587a5e53e5")]
 [assembly: System.Reflection.AssemblyProductAttribute("NpmDemo")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NpmDemo")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -420,11 +420,11 @@ namespace LicenseDiffTool.AppProcessing
             var result = new List<DiffEntry>();
 
             var fromMap = from
-                .GroupBy(d => d.PackageManager + "|" + d.Name)
+                .GroupBy(d => d.PackageManager + "|" + d.Name + "|" + (d.License ?? ""))
                 .ToDictionary(g => g.Key, g => g.First());
 
             var toMap = to
-                .GroupBy(d => d.PackageManager + "|" + d.Name)
+                .GroupBy(d => d.PackageManager + "|" + d.Name + "|" + (d.License ?? ""))
                 .ToDictionary(g => g.Key, g => g.First());
 
             // ADDED
@@ -457,8 +457,7 @@ namespace LicenseDiffTool.AppProcessing
 
             foreach (var kvp in fromMap)
             {
-                DependencyInfo toDep;
-                if (!toMap.TryGetValue(kvp.Key, out toDep))
+                if (!toMap.TryGetValue(kvp.Key, out var toDep))
                     continue;
 
                 var fromDep = kvp.Value;
@@ -476,16 +475,17 @@ namespace LicenseDiffTool.AppProcessing
             return result;
         }
 
+
         private List<PackageChangeSummary> BuildPackageSummaries(List<DependencyInfo> fromDeps, List<DependencyInfo> toDeps)
         {
             var result = new List<PackageChangeSummary>();
 
             var fromMap = fromDeps
-                .GroupBy(d => d.PackageManager + "|" + d.Name)
+                .GroupBy(d => d.PackageManager + "|" + d.Name + "|" + (d.License ?? ""))
                 .ToDictionary(g => g.Key, g => g.First());
 
             var toMap = toDeps
-                .GroupBy(d => d.PackageManager + "|" + d.Name)
+                .GroupBy(d => d.PackageManager + "|" + d.Name + "|" + (d.License ?? ""))
                 .ToDictionary(g => g.Key, g => g.First());
 
             var allKeys = new HashSet<string>(fromMap.Keys);
@@ -516,7 +516,6 @@ namespace LicenseDiffTool.AppProcessing
                 }
                 else
                 {
-                    // Added oder Removed -> Version gilt als geändert
                     hasVersionChange = true;
                     hasLicenseChange = false;
                 }

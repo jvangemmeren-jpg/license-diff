@@ -51,6 +51,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "LibGit2Sharp": {
+              "target": "Package",
+              "version": "[0.31.0, )"
+            },
             "Microsoft.AspNetCore.SpaServices.Extensions": {
               "target": "Package",
               "version": "[8.0.23, )"
