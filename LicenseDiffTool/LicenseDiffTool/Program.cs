@@ -85,8 +85,8 @@ namespace LicenseDiffTool.Cli
             var parseResult = rootCommand.Parse(args);
             return await parseResult.InvokeAsync();
         }
-        // Exclude volle Namen besser regex
-        // höchste Version einer Lizenz
+
+
         private static async Task<int> RunAsync(CliOptions options)
         {
             string? workingDir = null;
