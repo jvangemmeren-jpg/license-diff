@@ -1,10 +1,10 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NpmDemo\\NpmDemo\\",
+  "WorkspaceRootPath": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NpmDemo\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{4DF7E688-B9DD-4C18-8053-9C4632879048}|NpmDemo\\NpmDemo.csproj|c:\\users\\jvang\\source\\repos\\license_diff\\src\\npmdemo\\npmdemo\\npmdemo\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{4DF7E688-B9DD-4C18-8053-9C4632879048}|NpmDemo\\NpmDemo.csproj|solutionrelative:npmdemo\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F3D6C4A2-AFDA-4428-BFC2-29735A7BBBC8}|NpmDemo\\NpmDemo.csproj|c:\\users\\jvang\\source\\repos\\license_diff\\src\\npmdemo\\npmdemo\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F3D6C4A2-AFDA-4428-BFC2-29735A7BBBC8}|NpmDemo\\NpmDemo.csproj|solutionrelative:npmdemo\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -20,11 +20,11 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NpmDemo\\NpmDemo\\NpmDemo\\Program.cs",
+              "DocumentMoniker": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NpmDemo\\NpmDemo\\Program.cs",
               "RelativeDocumentMoniker": "NpmDemo\\Program.cs",
-              "ToolTip": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NpmDemo\\NpmDemo\\NpmDemo\\Program.cs",
+              "ToolTip": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NpmDemo\\NpmDemo\\Program.cs",
               "RelativeToolTip": "NpmDemo\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-01-29T08:28:59.772Z",
               "EditorCaption": ""

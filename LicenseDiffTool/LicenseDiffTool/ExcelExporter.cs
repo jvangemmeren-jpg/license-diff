@@ -1,10 +1,11 @@
-﻿using System;
+﻿using ClosedXML.Excel;
+using LicenseDiffTool.AppProcessing;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using ClosedXML.Excel;
-using LicenseDiffTool.AppProcessing;
+using static LicenseDiffTool.AppProcessing.AppProcessor;
 
 namespace LicenseDiffTool.Reporting
 {
@@ -45,7 +46,7 @@ namespace LicenseDiffTool.Reporting
             // Header
             ws.Cell(1, 1).Value = "PackageManager";
             ws.Cell(1, 2).Value = "PackageName";
-            ws.Cell(1, 3).Value = "ChangeType";
+            ws.Cell(1, 3).Value = "ChangeType";     // ADDED / REMOVED / LICENSE_CHANGED / VERSION_CHANGED / UNCHANGED
             ws.Cell(1, 4).Value = "FromVersion";
             ws.Cell(1, 5).Value = "FromLicense";
             ws.Cell(1, 6).Value = "ToVersion";
@@ -54,24 +55,65 @@ namespace LicenseDiffTool.Reporting
 
             FormatHeaderRow(ws.Row(1));
 
-            int rowNum = 2;
-            var sortedDiffs = appResult.DiffEntries
-                .OrderBy(d => d.From != null ? d.From.Name : d.To.Name)
-                .ToList();
+            var fromMap = appResult.FromDependencies
+                .GroupBy(d => d.PackageManager + "|" + d.Name)
+                .ToDictionary(g => g.Key, g => g.First());
 
-            foreach (var diff in sortedDiffs)
+            var toMap = appResult.ToDependencies
+                .GroupBy(d => d.PackageManager + "|" + d.Name)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            var allKeys = new HashSet<string>(fromMap.Keys);
+            foreach (var key in toMap.Keys)
+                allKeys.Add(key);
+
+            int rowNum = 2;
+
+            foreach (var key in allKeys.OrderBy(k => k))
             {
-                var packageName = diff.From != null ? diff.From.Name : diff.To.Name;
-                var pkgManager = diff.From != null ? diff.From.PackageManager : diff.To.PackageManager;
-                var licenseUrl = diff.From != null ? diff.From.LicenseUrl : diff.To.LicenseUrl;
+                fromMap.TryGetValue(key, out var fromDep);
+                toMap.TryGetValue(key, out var toDep);
+
+                var baseDep = toDep ?? fromDep;
+                var pkgManager = baseDep.PackageManager;
+                var name = baseDep.Name;
+
+                var fromVersion = fromDep != null ? fromDep.Version : "";
+                var fromLicense = fromDep != null ? fromDep.License : "";
+                var toVersion = toDep != null ? toDep.Version : "";
+                var toLicense = toDep != null ? toDep.License : "";
+                var licenseUrl = toDep?.LicenseUrl ?? fromDep?.LicenseUrl;
+
+                string changeType;
+
+                if (fromDep == null && toDep != null)
+                {
+                    changeType = "ADDED";
+                }
+                else if (fromDep != null && toDep == null)
+                {
+                    changeType = "REMOVED";
+                }
+                else
+                {
+                    bool versionChanged = !string.Equals(fromVersion, toVersion, StringComparison.OrdinalIgnoreCase);
+                    bool licenseChanged = !string.Equals(fromLicense, toLicense, StringComparison.OrdinalIgnoreCase);
+
+                    if (licenseChanged)
+                        changeType = "LICENSE_CHANGED";
+                    else if (versionChanged)
+                        changeType = "VERSION_CHANGED";
+                    else
+                        changeType = "UNCHANGED";
+                }
 
                 ws.Cell(rowNum, 1).Value = pkgManager;
-                ws.Cell(rowNum, 2).Value = packageName;
-                ws.Cell(rowNum, 3).Value = diff.ChangeType.ToString();
-                ws.Cell(rowNum, 4).Value = diff.From != null ? diff.From.Version : "";
-                ws.Cell(rowNum, 5).Value = diff.From != null ? diff.From.License : "";
-                ws.Cell(rowNum, 6).Value = diff.To != null ? diff.To.Version : "";
-                ws.Cell(rowNum, 7).Value = diff.To != null ? diff.To.License : "";
+                ws.Cell(rowNum, 2).Value = name;
+                ws.Cell(rowNum, 3).Value = changeType;
+                ws.Cell(rowNum, 4).Value = fromVersion;
+                ws.Cell(rowNum, 5).Value = fromLicense;
+                ws.Cell(rowNum, 6).Value = toVersion;
+                ws.Cell(rowNum, 7).Value = toLicense;
                 ws.Cell(rowNum, 8).Value = licenseUrl ?? "";
 
                 FormatUrlCell(ws.Cell(rowNum, 8));
@@ -81,6 +123,7 @@ namespace LicenseDiffTool.Reporting
 
             ws.Columns().AdjustToContents();
         }
+
 
         private void CreateCurrentDependenciesSheet(XLWorkbook workbook, AppResult appResult)
         {
@@ -124,35 +167,68 @@ namespace LicenseDiffTool.Reporting
             // Header
             ws.Cell(1, 1).Value = "PackageManager";
             ws.Cell(1, 2).Value = "PackageName";
-            ws.Cell(1, 3).Value = "HighestVersion";
-            ws.Cell(1, 4).Value = "License";
-            ws.Cell(1, 5).Value = "LicenseUrl";
+            ws.Cell(1, 3).Value = "FromVersion";
+            ws.Cell(1, 4).Value = "ToVersion";
+            ws.Cell(1, 5).Value = "FromLicense";
+            ws.Cell(1, 6).Value = "ToLicense";
+            ws.Cell(1, 7).Value = "HighestVersion";
+            ws.Cell(1, 8).Value = "License";
+            ws.Cell(1, 9).Value = "LicenseUrl";
+            ws.Cell(1, 10).Value = "HasVersionChange";
+            ws.Cell(1, 11).Value = "HasLicenseChange";
 
             FormatHeaderRow(ws.Row(1));
 
-            // Alle toCommit-Dependencies sammeln
-            var allDeps = new List<DependencyInfo>();
+            // Alle PackageSummaries aus allen Apps
+            var allSummaries = new List<PackageChangeSummary>();
             foreach (var result in appResults)
             {
-                allDeps.AddRange(result.ToDependencies);
+                if (result.PackageSummaries != null)
+                    allSummaries.AddRange(result.PackageSummaries);
             }
 
-            // Konsolidieren nach (PackageManager, Name, License) => höchste Version
-            var consolidated = allDeps
-                .GroupBy(d => new { d.PackageManager, d.Name, d.License })
-                .Select(g => new
-                {
-                    g.Key.PackageManager,
-                    g.Key.Name,
-                    g.Key.License,
-                    HighestVersion = GetHighestVersion(g.Select(d => d.Version).ToList()),
-                    LicenseUrl = g.FirstOrDefault(d => !string.IsNullOrEmpty(d.LicenseUrl)) != null
-                        ? g.First(d => !string.IsNullOrEmpty(d.LicenseUrl)).LicenseUrl
+            // Lookup für LicenseUrl aus ToDependencies
+            var urlLookup = appResults
+                .SelectMany(r => r.ToDependencies)
+                .GroupBy(d => d.PackageManager + "|" + d.Name + "|" + d.License)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.FirstOrDefault(dep => !string.IsNullOrEmpty(dep.LicenseUrl)) != null
+                        ? g.First(dep => !string.IsNullOrEmpty(dep.LicenseUrl)).LicenseUrl
                         : null
+                );
+
+            // Gruppieren nach (PackageManager, Name) – pro Paket über alle Apps
+            var consolidated = allSummaries
+                .GroupBy(s => new { s.PackageManager, s.Name })
+                .Select(g =>
+                {
+                    var anyWithTo = g.FirstOrDefault(s => !string.IsNullOrEmpty(s.ToVersion)) ?? g.First();
+
+                    var toLicense = anyWithTo.ToLicense;
+                    var licenseKey = anyWithTo.PackageManager + "|" + anyWithTo.Name + "|" + toLicense;
+
+                    return new
+                    {
+                        anyWithTo.PackageManager,
+                        anyWithTo.Name,
+                        // From/To aus Sicht eines beliebigen Repos (repräsentativ)
+                        FromVersion = anyWithTo.FromVersion,
+                        ToVersion = anyWithTo.ToVersion,
+                        FromLicense = anyWithTo.FromLicense,
+                        ToLicense = anyWithTo.ToLicense,
+                        HighestVersion = GetHighestVersion(
+                            g.SelectMany(s => new[] { s.FromVersion, s.ToVersion })
+                             .Where(v => !string.IsNullOrEmpty(v))
+                             .ToList()),
+                        HasVersionChange = g.Any(s => s.HasVersionChange),
+                        HasLicenseChange = g.Any(s => s.HasLicenseChange),
+                        License = toLicense,
+                        LicenseUrl = urlLookup.ContainsKey(licenseKey) ? urlLookup[licenseKey] : null
+                    };
                 })
                 .OrderBy(x => x.PackageManager)
                 .ThenBy(x => x.Name)
-                .ThenBy(x => x.License)
                 .ToList();
 
             int rowNum = 2;
@@ -160,17 +236,25 @@ namespace LicenseDiffTool.Reporting
             {
                 ws.Cell(rowNum, 1).Value = item.PackageManager;
                 ws.Cell(rowNum, 2).Value = item.Name;
-                ws.Cell(rowNum, 3).Value = item.HighestVersion;
-                ws.Cell(rowNum, 4).Value = item.License;
-                ws.Cell(rowNum, 5).Value = item.LicenseUrl ?? "";
+                ws.Cell(rowNum, 3).Value = item.FromVersion;
+                ws.Cell(rowNum, 4).Value = item.ToVersion;
+                ws.Cell(rowNum, 5).Value = item.FromLicense;
+                ws.Cell(rowNum, 6).Value = item.ToLicense;
+                ws.Cell(rowNum, 7).Value = item.HighestVersion;
+                ws.Cell(rowNum, 8).Value = item.License;
+                ws.Cell(rowNum, 9).Value = item.LicenseUrl ?? "";
+                ws.Cell(rowNum, 10).Value = item.HasVersionChange ? "Yes" : "No";
+                ws.Cell(rowNum, 11).Value = item.HasLicenseChange ? "Yes" : "No";
 
-                FormatUrlCell(ws.Cell(rowNum, 5));
+                FormatUrlCell(ws.Cell(rowNum, 9));
 
                 rowNum++;
             }
 
             ws.Columns().AdjustToContents();
         }
+
+
 
         private void CreateAggregatedDiffSheet(XLWorkbook workbook, List<AppResult> appResults)
         {

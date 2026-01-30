@@ -1,10 +1,31 @@
 {
   "version": 2,
-  "dgSpecHash": "3ErYeQYcHtI=",
+  "dgSpecHash": "OmuFPIlOnjY=",
   "success": true,
   "projectFilePath": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NugetDemo\\NugetDemo\\NugetDemo.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\jvang\\.nuget\\packages\\newtonsoft.json\\13.0.4\\newtonsoft.json.13.0.4.nupkg.sha512"
+    "C:\\Users\\jvang\\.nuget\\packages\\closedxml\\0.105.0\\closedxml.0.105.0.nupkg.sha512",
+    "C:\\Users\\jvang\\.nuget\\packages\\closedxml.parser\\2.0.0\\closedxml.parser.2.0.0.nupkg.sha512",
+    "C:\\Users\\jvang\\.nuget\\packages\\documentformat.openxml\\3.1.1\\documentformat.openxml.3.1.1.nupkg.sha512",
+    "C:\\Users\\jvang\\.nuget\\packages\\documentformat.openxml.framework\\3.1.1\\documentformat.openxml.framework.3.1.1.nupkg.sha512",
+    "C:\\Users\\jvang\\.nuget\\packages\\excelnumberformat\\1.1.0\\excelnumberformat.1.1.0.nupkg.sha512",
+    "C:\\Users\\jvang\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512",
+    "C:\\Users\\jvang\\.nuget\\packages\\rbush.signed\\4.0.0\\rbush.signed.4.0.0.nupkg.sha512",
+    "C:\\Users\\jvang\\.nuget\\packages\\sixlabors.fonts\\1.0.0\\sixlabors.fonts.1.0.0.nupkg.sha512",
+    "C:\\Users\\jvang\\.nuget\\packages\\system.io.packaging\\8.0.1\\system.io.packaging.8.0.1.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "message": "NugetDemo hängt von Newtonsoft.Json (>= 13.0.0) ab, aber Newtonsoft.Json 13.0.0 wurde nicht gefunden. Newtonsoft.Json 13.0.1 wurde stattdessen aufgelöst.",
+      "projectPath": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NugetDemo\\NugetDemo\\NugetDemo.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NugetDemo\\NugetDemo\\NugetDemo.csproj",
+      "libraryId": "Newtonsoft.Json",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    }
+  ]
 }

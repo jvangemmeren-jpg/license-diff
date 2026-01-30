@@ -85,9 +85,12 @@ namespace LicenseDiffTool.Cli
             var parseResult = rootCommand.Parse(args);
             return await parseResult.InvokeAsync();
         }
-
+        // Exclude volle Namen besser regex
+        // höchste Version einer Lizenz
         private static async Task<int> RunAsync(CliOptions options)
         {
+            string? workingDir = null;
+
             try
             {
                 if (options.Verbose)
@@ -95,7 +98,7 @@ namespace LicenseDiffTool.Cli
 
                 var config = LoadConfig(options.ConfigPath);
 
-                var workingDir = Path.GetFullPath(config.WorkingDirectory);
+                workingDir = Path.GetFullPath(config.WorkingDirectory);
                 var outputDir = Path.GetFullPath(options.OutputDir);
 
                 Directory.CreateDirectory(workingDir);
@@ -148,29 +151,93 @@ namespace LicenseDiffTool.Cli
                     excelExporter.ExportAggregatedReport(appResults, outputDir);
                 }
 
-                // Working Directory löschen
-                try
-                {
-                    if (options.Verbose)
-                        Console.WriteLine($"[INFO] Lösche Working Directory '{workingDir}' ...");
-
-                    Directory.Delete(workingDir, recursive: true);
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"[WARN] Konnte Working Directory nicht löschen: {ex.Message}");
-                }
+                // am Ende aufräumen (robuster Cleanup mit Retry)
+                await CleanupWorkingDirectory(workingDir, options.Verbose);
 
                 return 0;
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine($"[FATAL] {ex.Message}");
+
+                // auch im Fehlerfall versuchen aufzuräumen
+                await CleanupWorkingDirectory(workingDir, options.Verbose);
                 return 1;
             }
             finally
             {
                 await Task.CompletedTask;
+            }
+        }
+
+        private static async Task CleanupWorkingDirectory(string? workingDir, bool verbose)
+        {
+            if (string.IsNullOrWhiteSpace(workingDir))
+                return;
+
+            if (!Directory.Exists(workingDir))
+            {
+                if (verbose)
+                    Console.WriteLine($"[INFO] Working Directory '{workingDir}' existiert nicht, nichts zu löschen.");
+                return;
+            }
+
+            const int maxRetries = 3;
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
+            {
+                try
+                {
+                    if (verbose)
+                        Console.WriteLine($"[INFO] Versuche Working Directory zu löschen (Versuch {attempt}/{maxRetries}): {workingDir}");
+
+                    NormalizeAttributesRecursively(workingDir);
+
+                    Directory.Delete(workingDir, recursive: true);
+
+                    if (verbose)
+                        Console.WriteLine("[INFO] Working Directory wurde erfolgreich gelöscht.");
+                    return;
+                }
+                catch (IOException ex)
+                {
+                    if (attempt == maxRetries)
+                    {
+                        Console.Error.WriteLine(
+                            "[WARN] Konnte Working Directory nicht vollständig löschen: " + ex.Message);
+                        return;
+                    }
+
+                    await Task.Delay(500);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    if (attempt == maxRetries)
+                    {
+                        Console.Error.WriteLine(
+                            "[WARN] Konnte Working Directory nicht vollständig löschen (Access denied): " + ex.Message);
+                        return;
+                    }
+
+                    await Task.Delay(500);
+                }
+            }
+        }
+
+        private static void NormalizeAttributesRecursively(string directoryPath)
+        {
+            if (!Directory.Exists(directoryPath))
+                return;
+
+            foreach (var file in Directory.GetFiles(directoryPath, "*", SearchOption.AllDirectories))
+            {
+                try
+                {
+                    File.SetAttributes(file, FileAttributes.Normal);
+                }
+                catch
+                {
+                    // einzelne Dateien können ignoriert werden
+                }
             }
         }
 
@@ -217,9 +284,6 @@ namespace LicenseDiffTool.Cli
 
                 if (string.IsNullOrWhiteSpace(app.GitUrl))
                     throw new InvalidOperationException($"Config: App '{app.Name}' braucht eine 'gitUrl'.");
-
-                if (string.IsNullOrWhiteSpace(app.FromCommit) || string.IsNullOrWhiteSpace(app.ToCommit))
-                    throw new InvalidOperationException($"Config: App '{app.Name}' braucht 'fromCommit' und 'toCommit'.");
 
                 if ((app.CsprojPaths == null || app.CsprojPaths.Count == 0) &&
                     (app.NpmProjectDirs == null || app.NpmProjectDirs.Count == 0))

@@ -4,8 +4,8 @@
     {
       "name": "NugetDemo",
       "gitUrl": "https://github.com/jvangemmeren-jpg/license-diff.git",
-      "fromCommit": "5df9b987fce0e639ea0662f723ceac498ee06bf7",
-      "toCommit":   "066ba55837670de959c711df9865448cf5f34d99",
+      "fromCommit": "066ba55837670de959c711df9865448cf5f34d99",
+      "toCommit":   "f811b67e7afb375e9acac06e6a678ebed87d984b",
       "csprojPaths": [
         "src/NugetDemo/NugetDemo/NugetDemo.csproj"
       ],
@@ -21,8 +21,8 @@
     {
       "name": "NpmDemo",
       "gitUrl": "https://github.com/jvangemmeren-jpg/license-diff.git",
-      "fromCommit": "5df9b987fce0e639ea0662f723ceac498ee06bf7",
-      "toCommit":   "066ba55837670de959c711df9865448cf5f34d99",
+      "fromCommit": "066ba55837670de959c711df9865448cf5f34d99",
+      "toCommit":   "f811b67e7afb375e9acac06e6a678ebed87d984b",
       "csprojPaths": [
         "src/NpmDemo/NpmDemo/NpmDemo.csproj"
       ],

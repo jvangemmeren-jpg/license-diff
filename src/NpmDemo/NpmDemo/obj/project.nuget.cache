@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "IsJ+5qzCs28=",
+  "dgSpecHash": "oDMTx7SmKxw=",
   "success": true,
   "projectFilePath": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NpmDemo\\NpmDemo\\NpmDemo.csproj",
   "expectedPackageFiles": [
@@ -8,7 +8,10 @@
     "C:\\Users\\jvang\\.nuget\\packages\\microsoft.extensions.fileproviders.abstractions\\8.0.0\\microsoft.extensions.fileproviders.abstractions.8.0.0.nupkg.sha512",
     "C:\\Users\\jvang\\.nuget\\packages\\microsoft.extensions.fileproviders.physical\\8.0.0\\microsoft.extensions.fileproviders.physical.8.0.0.nupkg.sha512",
     "C:\\Users\\jvang\\.nuget\\packages\\microsoft.extensions.filesystemglobbing\\8.0.0\\microsoft.extensions.filesystemglobbing.8.0.0.nupkg.sha512",
-    "C:\\Users\\jvang\\.nuget\\packages\\microsoft.extensions.primitives\\8.0.0\\microsoft.extensions.primitives.8.0.0.nupkg.sha512"
+    "C:\\Users\\jvang\\.nuget\\packages\\microsoft.extensions.primitives\\8.0.0\\microsoft.extensions.primitives.8.0.0.nupkg.sha512",
+    "C:\\Users\\jvang\\.nuget\\packages\\node.js\\0.12.7\\node.js.0.12.7.nupkg.sha512",
+    "C:\\Users\\jvang\\.nuget\\packages\\nogit\\0.1.0\\nogit.0.1.0.nupkg.sha512",
+    "C:\\Users\\jvang\\.nuget\\packages\\npm\\3.5.2\\npm.3.5.2.nupkg.sha512"
   ],
   "logs": []
 }

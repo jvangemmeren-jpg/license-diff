@@ -1,10 +1,11 @@
-﻿using System;
+﻿using LibGit2Sharp;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using LibGit2Sharp;
+using System.Text.RegularExpressions;
 
 namespace LicenseDiffTool.AppProcessing
 {
@@ -19,10 +20,15 @@ namespace LicenseDiffTool.AppProcessing
         public List<string> NpmProjectDirs { get; set; } = new List<string>();
     }
 
+
     public class ExcludeConfig
     {
         public List<string> Nuget { get; set; } = new List<string>();
         public List<string> Npm { get; set; } = new List<string>();
+        
+        // optional: gecachte Regex-Listen
+        internal List<Regex>? NugetRegex { get; set; }
+        internal List<Regex>? NpmRegex { get; set; }
     }
 
     public class DependencyInfo
@@ -48,44 +54,108 @@ namespace LicenseDiffTool.AppProcessing
         public DiffChangeType ChangeType { get; set; }
     }
 
+    public class PackageChangeSummary
+    {
+        public string PackageManager { get; set; }
+        public string Name { get; set; }
+
+        // Zustand im fromCommit
+        public string FromVersion { get; set; }
+        public string FromLicense { get; set; }
+
+        // Zustand im toCommit
+        public string ToVersion { get; set; }
+        public string ToLicense { get; set; }
+
+        public bool HasVersionChange { get; set; }
+        public bool HasLicenseChange { get; set; }
+    }
+
+
     public class AppResult
     {
         public string AppName { get; set; }
         public List<DependencyInfo> FromDependencies { get; set; }
         public List<DependencyInfo> ToDependencies { get; set; }
         public List<DiffEntry> DiffEntries { get; set; }
+        public List<PackageChangeSummary> PackageSummaries { get; set; }
     }
 
     public class AppProcessor
     {
+        private List<Regex> BuildRegexList(List<string> patterns)
+        {
+            var list = new List<Regex>();
+
+            foreach (var pattern in patterns)
+            {
+                if (string.IsNullOrWhiteSpace(pattern))
+                    continue;
+
+                // Spezielle Behandlung: * als Wildcard, sonst direkter Regex
+                string regexPattern;
+
+                if (pattern.Contains("*"))
+                {
+                    // z.B. "Microsoft.*" -> ^Microsoft\..*$
+                    var escaped = Regex.Escape(pattern).Replace("\\*", ".*");
+                    regexPattern = "^" + escaped + "$";
+                }
+                else
+                {
+                    // exakter Name -> ^Name$ (case-insensitive)
+                    regexPattern = "^" + Regex.Escape(pattern) + "$";
+                }
+
+                list.Add(new Regex(regexPattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant));
+            }
+
+            return list;
+        }
+
         public AppResult ProcessApp(AppConfig app, string workingBaseDir)
         {
             var repoDir = Path.Combine(workingBaseDir, app.Name);
 
             CloneOrOpen(app.GitUrl, repoDir);
 
+            if (string.IsNullOrWhiteSpace(app.FromCommit) || string.IsNullOrWhiteSpace(app.ToCommit))
+                throw new InvalidOperationException(
+                    "App '" + app.Name + "' benötigt 'fromCommit' und 'toCommit' in der Config.");
+
+            var fromCommitSha = app.FromCommit;
+            var toCommitSha = app.ToCommit;
+
+            Console.WriteLine("[INFO] Verwende Commits für App '" + app.Name + "':");
+            Console.WriteLine("fromCommit = " + fromCommitSha);
+            Console.WriteLine("toCommit   = " + toCommitSha);
+
             // fromCommit
-            Checkout(repoDir, app.FromCommit);
+            Checkout(repoDir, fromCommitSha);
             var fromDeps = AnalyzeAllDependencies(repoDir, app);
             ApplyExcludes(fromDeps, app.Excludes);
             ResolveLicenses(fromDeps, repoDir);
 
             // toCommit
-            Checkout(repoDir, app.ToCommit);
+            Checkout(repoDir, toCommitSha);
             var toDeps = AnalyzeAllDependencies(repoDir, app);
             ApplyExcludes(toDeps, app.Excludes);
             ResolveLicenses(toDeps, repoDir);
 
             var diff = CalculateDiff(fromDeps, toDeps);
+            var packageSummaries = BuildPackageSummaries(fromDeps, toDeps); // falls du das bereits drin hast
 
             return new AppResult
             {
                 AppName = app.Name,
                 FromDependencies = fromDeps,
                 ToDependencies = toDeps,
-                DiffEntries = diff
+                DiffEntries = diff,
+                PackageSummaries = packageSummaries
             };
         }
+
+        // Git
 
         private void CloneOrOpen(string gitUrl, string repoDir)
         {
@@ -110,6 +180,8 @@ namespace LicenseDiffTool.AppProcessing
                 });
             }
         }
+
+        // Dependency Analyse
 
         private List<DependencyInfo> AnalyzeAllDependencies(string repoDir, AppConfig app)
         {
@@ -149,7 +221,6 @@ namespace LicenseDiffTool.AppProcessing
 
             return result;
         }
-
 
         private IEnumerable<DependencyInfo> AnalyzeNuGet(string csprojPath)
         {
@@ -240,9 +311,13 @@ namespace LicenseDiffTool.AppProcessing
         {
             var deps = new List<DependencyInfo>();
 
+            // Falls nötig: absoluten Pfad zu npm verwenden:
+            var npmPath = @"C:\Program Files\nodejs\npm.cmd";
+            // var npmPath = "npm";
+
             var psi = new ProcessStartInfo
             {
-                FileName = "npm",
+                FileName = npmPath,
                 Arguments = "ls --json --production --all",
                 WorkingDirectory = workingDir,
                 RedirectStandardOutput = true,
@@ -260,6 +335,9 @@ namespace LicenseDiffTool.AppProcessing
                 var error = process.StandardError.ReadToEnd();
                 process.WaitForExit();
 
+                Console.WriteLine("[DEBUG] npm ls in: " + workingDir);
+                Console.WriteLine("[DEBUG] npm ls Error: " + error);
+
                 if (string.IsNullOrWhiteSpace(output))
                     throw new InvalidOperationException("npm ls failed in " + workingDir + ": " + error);
 
@@ -271,6 +349,7 @@ namespace LicenseDiffTool.AppProcessing
 
             return deps;
         }
+
 
         private void ParseNpmDependencies(JsonElement element, List<DependencyInfo> deps)
         {
@@ -298,44 +377,43 @@ namespace LicenseDiffTool.AppProcessing
                     PackageManager = "npm"
                 });
 
-                // rekursiv für transitive Dependencies
                 ParseNpmDependencies(value, deps);
             }
         }
 
+        // Excludes & Diff
+
         private void ApplyExcludes(List<DependencyInfo> deps, ExcludeConfig excludes)
         {
+            // Regex-Listen bei Bedarf einmalig erzeugen
+            excludes.NugetRegex ??= BuildRegexList(excludes.Nuget);
+            excludes.NpmRegex ??= BuildRegexList(excludes.Npm);
+
             deps.RemoveAll(d =>
             {
                 if (d.PackageManager == "nuget")
-                    return IsExcluded(d.Name, excludes.Nuget);
+                    return IsExcluded(d.Name, excludes.NugetRegex);
                 if (d.PackageManager == "npm")
-                    return IsExcluded(d.Name, excludes.Npm);
+                    return IsExcluded(d.Name, excludes.NpmRegex);
                 return false;
             });
         }
 
-        private bool IsExcluded(string name, List<string> patterns)
-        {
-            foreach (var pattern in patterns)
-            {
-                if (string.IsNullOrWhiteSpace(pattern))
-                    continue;
 
-                if (pattern.EndsWith("*", StringComparison.Ordinal))
-                {
-                    var prefix = pattern.Substring(0, pattern.Length - 1);
-                    if (name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                        return true;
-                }
-                else if (string.Equals(name, pattern, StringComparison.OrdinalIgnoreCase))
-                {
+        private bool IsExcluded(string name, List<Regex>? regexList)
+        {
+            if (regexList == null || regexList.Count == 0)
+                return false;
+
+            foreach (var rx in regexList)
+            {
+                if (rx.IsMatch(name))
                     return true;
-                }
             }
 
             return false;
         }
+
 
         private List<DiffEntry> CalculateDiff(List<DependencyInfo> from, List<DependencyInfo> to)
         {
@@ -377,7 +455,6 @@ namespace LicenseDiffTool.AppProcessing
                 }
             }
 
-            // LICENSE_CHANGED
             foreach (var kvp in fromMap)
             {
                 DependencyInfo toDep;
@@ -399,7 +476,69 @@ namespace LicenseDiffTool.AppProcessing
             return result;
         }
 
-        // ---------- Lizenzauflösung ----------
+        private List<PackageChangeSummary> BuildPackageSummaries(List<DependencyInfo> fromDeps, List<DependencyInfo> toDeps)
+        {
+            var result = new List<PackageChangeSummary>();
+
+            var fromMap = fromDeps
+                .GroupBy(d => d.PackageManager + "|" + d.Name)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            var toMap = toDeps
+                .GroupBy(d => d.PackageManager + "|" + d.Name)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            var allKeys = new HashSet<string>(fromMap.Keys);
+            foreach (var key in toMap.Keys)
+                allKeys.Add(key);
+
+            foreach (var key in allKeys)
+            {
+                fromMap.TryGetValue(key, out var fromDep);
+                toMap.TryGetValue(key, out var toDep);
+
+                var baseDep = toDep ?? fromDep;
+                var pkgManager = baseDep.PackageManager;
+                var name = baseDep.Name;
+
+                var fromVersion = fromDep != null ? fromDep.Version : "";
+                var fromLicense = fromDep != null ? fromDep.License : "";
+                var toVersion = toDep != null ? toDep.Version : "";
+                var toLicense = toDep != null ? toDep.License : "";
+
+                bool hasVersionChange = false;
+                bool hasLicenseChange = false;
+
+                if (fromDep != null && toDep != null)
+                {
+                    hasVersionChange = !string.Equals(fromVersion, toVersion, StringComparison.OrdinalIgnoreCase);
+                    hasLicenseChange = !string.Equals(fromLicense, toLicense, StringComparison.OrdinalIgnoreCase);
+                }
+                else
+                {
+                    // Added oder Removed -> Version gilt als geändert
+                    hasVersionChange = true;
+                    hasLicenseChange = false;
+                }
+
+                result.Add(new PackageChangeSummary
+                {
+                    PackageManager = pkgManager,
+                    Name = name,
+                    FromVersion = fromVersion,
+                    FromLicense = fromLicense,
+                    ToVersion = toVersion,
+                    ToLicense = toLicense,
+                    HasVersionChange = hasVersionChange,
+                    HasLicenseChange = hasLicenseChange
+                });
+            }
+
+            return result;
+        }
+
+
+        // Lizenzauflösung
 
         private void ResolveLicenses(List<DependencyInfo> deps, string repoDir)
         {
@@ -437,7 +576,6 @@ namespace LicenseDiffTool.AppProcessing
 
                 var xml = File.ReadAllText(nuspecPath);
 
-                // license type="expression"
                 var licenseTag = "<license type=\"expression\">";
                 var idx = xml.IndexOf(licenseTag, StringComparison.OrdinalIgnoreCase);
                 if (idx >= 0)
@@ -451,7 +589,6 @@ namespace LicenseDiffTool.AppProcessing
                     }
                 }
 
-                // legacy licenseUrl
                 var urlTag = "<licenseUrl>";
                 idx = xml.IndexOf(urlTag, StringComparison.OrdinalIgnoreCase);
                 if (idx >= 0)
@@ -544,9 +681,15 @@ namespace LicenseDiffTool.AppProcessing
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 dep.License = "UNKNOWN";
+                Console.WriteLine("[WARN] Konnte License für npm-Paket '" + dep.Name +
+                      "' (Version " + dep.Version + ") nicht ermitteln. " +
+                      "Pfad: " + Path.Combine(repoDir, "node_modules", dep.Name, "package.json") +
+                      " Fehler: " + ex.Message);
+                dep.License = "UNKNOWN";
+                dep.LicenseUrl = "https://www.npmjs.com/package/" + dep.Name;
             }
         }
     }
