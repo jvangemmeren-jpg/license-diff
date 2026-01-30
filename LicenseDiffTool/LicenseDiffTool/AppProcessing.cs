@@ -561,6 +561,9 @@ namespace LicenseDiffTool.AppProcessing
 
                 if (!Directory.Exists(packageDir))
                 {
+                    Console.WriteLine("[WARN] NuGet-Paketordner nicht gefunden für "
+                        + dep.Name + " " + dep.Version + " im Cache: " + packageDir);
+
                     dep.License = "UNKNOWN";
                     dep.LicenseUrl = "https://www.nuget.org/packages/" + dep.Name + "/" + dep.Version;
                     return;
@@ -569,6 +572,9 @@ namespace LicenseDiffTool.AppProcessing
                 var nuspecPath = Directory.GetFiles(packageDir, "*.nuspec").FirstOrDefault();
                 if (nuspecPath == null)
                 {
+                    Console.WriteLine("[WARN] Nuspec-Datei nicht gefunden für "
+                        + dep.Name + " " + dep.Version + " im Ordner: " + packageDir);
+
                     dep.License = "UNKNOWN";
                     dep.LicenseUrl = "https://www.nuget.org/packages/" + dep.Name + "/" + dep.Version;
                     return;
@@ -605,11 +611,15 @@ namespace LicenseDiffTool.AppProcessing
 
                 dep.License = "UNKNOWN";
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine("[WARN] Fehler beim Ermitteln der NuGet-Lizenz für Paket '" + dep.Name + "' (Version " + dep.Version + "): " + ex.Message);
+
                 dep.License = "UNKNOWN";
+                dep.LicenseUrl = "https://www.nuget.org/packages/" + dep.Name + "/" + dep.Version;
             }
         }
+
 
         private void ResolveNpmLicense(DependencyInfo dep, string repoDir)
         {
@@ -683,11 +693,8 @@ namespace LicenseDiffTool.AppProcessing
             }
             catch (Exception ex)
             {
-                dep.License = "UNKNOWN";
-                Console.WriteLine("[WARN] Konnte License für npm-Paket '" + dep.Name +
-                      "' (Version " + dep.Version + ") nicht ermitteln. " +
-                      "Pfad: " + Path.Combine(repoDir, "node_modules", dep.Name, "package.json") +
-                      " Fehler: " + ex.Message);
+                Console.WriteLine("[WARN] Konnte License für npm-Paket '" + dep.Name + "' (Version " + dep.Version + ") nicht ermitteln. " + "Pfad: " + Path.Combine(repoDir, "node_modules", dep.Name, "package.json") + " Fehler: " + ex.Message);
+
                 dep.License = "UNKNOWN";
                 dep.LicenseUrl = "https://www.npmjs.com/package/" + dep.Name;
             }

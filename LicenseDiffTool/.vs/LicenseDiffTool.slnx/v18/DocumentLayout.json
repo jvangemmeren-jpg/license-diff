@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\jvang\\source\\repos\\license_diff\\LicenseDiffTool\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{C4521DED-D83A-75DB-B51D-BDD864C1A8FF}|LicenseDiffTool\\LicenseDiffTool.csproj|c:\\users\\jvang\\source\\repos\\license_diff\\licensedifftool\\licensedifftool\\appprocessing.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C4521DED-D83A-75DB-B51D-BDD864C1A8FF}|LicenseDiffTool\\LicenseDiffTool.csproj|solutionrelative:licensedifftool\\appprocessing.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{C4521DED-D83A-75DB-B51D-BDD864C1A8FF}|LicenseDiffTool\\LicenseDiffTool.csproj|c:\\users\\jvang\\source\\repos\\license_diff\\licensedifftool\\licensedifftool\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C4521DED-D83A-75DB-B51D-BDD864C1A8FF}|LicenseDiffTool\\LicenseDiffTool.csproj|solutionrelative:licensedifftool\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C4521DED-D83A-75DB-B51D-BDD864C1A8FF}|LicenseDiffTool\\LicenseDiffTool.csproj|c:\\users\\jvang\\source\\repos\\license_diff\\licensedifftool\\licensedifftool\\appprocessing.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C4521DED-D83A-75DB-B51D-BDD864C1A8FF}|LicenseDiffTool\\LicenseDiffTool.csproj|solutionrelative:licensedifftool\\appprocessing.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{C4521DED-D83A-75DB-B51D-BDD864C1A8FF}|LicenseDiffTool\\LicenseDiffTool.csproj|c:\\users\\jvang\\source\\repos\\license_diff\\licensedifftool\\licensedifftool\\excelexporter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -22,8 +22,12 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 3,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
             {
               "$type": "Document",
               "DocumentIndex": 2,
@@ -38,26 +42,26 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "AppProcessing.cs",
               "DocumentMoniker": "C:\\Users\\jvang\\source\\repos\\license_diff\\LicenseDiffTool\\LicenseDiffTool\\AppProcessing.cs",
               "RelativeDocumentMoniker": "LicenseDiffTool\\AppProcessing.cs",
               "ToolTip": "C:\\Users\\jvang\\source\\repos\\license_diff\\LicenseDiffTool\\LicenseDiffTool\\AppProcessing.cs",
               "RelativeToolTip": "LicenseDiffTool\\AppProcessing.cs",
-              "ViewState": "AgIAAHsCAAAAAAAAAAAQwJcCAAAcAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAALcCAABXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-01-25T14:30:46.852Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\jvang\\source\\repos\\license_diff\\LicenseDiffTool\\LicenseDiffTool\\Program.cs",
               "RelativeDocumentMoniker": "LicenseDiffTool\\Program.cs",
               "ToolTip": "C:\\Users\\jvang\\source\\repos\\license_diff\\LicenseDiffTool\\LicenseDiffTool\\Program.cs",
               "RelativeToolTip": "LicenseDiffTool\\Program.cs",
-              "ViewState": "AgIAAEsAAAAAAAAAAAAlwGEAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAANgAAAAAAAAAAAAawOQAAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-01-25T14:24:27.384Z",
               "EditorCaption": ""

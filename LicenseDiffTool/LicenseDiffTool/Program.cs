@@ -234,9 +234,9 @@ namespace LicenseDiffTool.Cli
                 {
                     File.SetAttributes(file, FileAttributes.Normal);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // einzelne Dateien können ignoriert werden
+                    Console.WriteLine("[WARN] Konnte Attribute für Datei nicht zurücksetzen: " + file + " – Fehler: " + ex.Message);
                 }
             }
         }

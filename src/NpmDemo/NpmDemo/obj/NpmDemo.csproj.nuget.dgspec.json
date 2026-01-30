@@ -54,10 +54,6 @@
             "Microsoft.AspNetCore.SpaServices.Extensions": {
               "target": "Package",
               "version": "[8.0.23, )"
-            },
-            "Npm": {
-              "target": "Package",
-              "version": "[3.5.2, )"
             }
           },
           "imports": [

@@ -9,5 +9,11 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "dependencies": {
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "webpack": "^5.104.1"
+  }
 }
