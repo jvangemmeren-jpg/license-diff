@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NugetDemo")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6166decd5e9c8c6c5f3b39922fbc39587a5e53e5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+965d75164eaca3684bfda0a3f172221fafc8fe2b")]
 [assembly: System.Reflection.AssemblyProductAttribute("NugetDemo")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NugetDemo")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

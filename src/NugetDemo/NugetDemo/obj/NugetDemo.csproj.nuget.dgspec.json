@@ -53,7 +53,7 @@
           "dependencies": {
             "ClosedXML": {
               "target": "Package",
-              "version": "[0.101.0, )"
+              "version": "[0.105.0, )"
             },
             "LibGit2Sharp": {
               "target": "Package",
@@ -61,7 +61,7 @@
             },
             "Newtonsoft.Json": {
               "target": "Package",
-              "version": "[13.0.0, )"
+              "version": "[13.0.4, )"
             }
           },
           "imports": [
