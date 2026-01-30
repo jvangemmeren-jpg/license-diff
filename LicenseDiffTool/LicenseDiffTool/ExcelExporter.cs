@@ -69,7 +69,7 @@ namespace LicenseDiffTool.Reporting
 
             int rowNum = 2;
 
-            foreach (var key in allKeys.OrderBy(k => k))
+            foreach (var key in allKeys.OrderBy(k => (toMap.ContainsKey(k) ? toMap[k] : fromMap[k]).Name, StringComparer.OrdinalIgnoreCase))
             {
                 fromMap.TryGetValue(key, out var fromDep);
                 toMap.TryGetValue(key, out var toDep);

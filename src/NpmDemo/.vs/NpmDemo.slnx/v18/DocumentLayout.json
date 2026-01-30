@@ -3,7 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NpmDemo\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jvang\\.nuget\\packages\\npm\\3.5.2\\readme.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
+      "AbsoluteMoniker": "D:0:0:{F3D6C4A2-AFDA-4428-BFC2-29735A7BBBC8}|NpmDemo\\NpmDemo.csproj|c:\\users\\jvang\\source\\repos\\license_diff\\src\\npmdemo\\npmdemo\\package-lock.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{F3D6C4A2-AFDA-4428-BFC2-29735A7BBBC8}|NpmDemo\\NpmDemo.csproj|solutionrelative:npmdemo\\package-lock.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F3D6C4A2-AFDA-4428-BFC2-29735A7BBBC8}|NpmDemo\\NpmDemo.csproj|c:\\users\\jvang\\source\\repos\\license_diff\\src\\npmdemo\\npmdemo\\package.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{F3D6C4A2-AFDA-4428-BFC2-29735A7BBBC8}|NpmDemo\\NpmDemo.csproj|solutionrelative:npmdemo\\package.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F3D6C4A2-AFDA-4428-BFC2-29735A7BBBC8}|NpmDemo\\NpmDemo.csproj|c:\\users\\jvang\\source\\repos\\license_diff\\src\\npmdemo\\npmdemo\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -22,19 +27,32 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "readme.txt",
-              "DocumentMoniker": "C:\\Users\\jvang\\.nuget\\packages\\npm\\3.5.2\\readme.txt",
-              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\.nuget\\packages\\npm\\3.5.2\\readme.txt",
-              "ToolTip": "C:\\Users\\jvang\\.nuget\\packages\\npm\\3.5.2\\readme.txt",
-              "RelativeToolTip": "..\\..\\..\\..\\..\\.nuget\\packages\\npm\\3.5.2\\readme.txt",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
-              "WhenOpened": "2026-01-30T08:06:20.661Z",
+              "Title": "package-lock.json",
+              "DocumentMoniker": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NpmDemo\\NpmDemo\\package-lock.json",
+              "RelativeDocumentMoniker": "NpmDemo\\package-lock.json",
+              "ToolTip": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NpmDemo\\NpmDemo\\package-lock.json",
+              "RelativeToolTip": "NpmDemo\\package-lock.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-01-30T10:47:16.836Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "package.json",
+              "DocumentMoniker": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NpmDemo\\NpmDemo\\package.json",
+              "RelativeDocumentMoniker": "NpmDemo\\package.json",
+              "ToolTip": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NpmDemo\\NpmDemo\\package.json",
+              "RelativeToolTip": "NpmDemo\\package.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-01-30T08:27:37.951Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\jvang\\source\\repos\\license_diff\\src\\NpmDemo\\NpmDemo\\Program.cs",
               "RelativeDocumentMoniker": "NpmDemo\\Program.cs",
